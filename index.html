@@ -1,0 +1,871 @@
+<!doctype html>
+<html lang="km">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0f1d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>ICT Trade Guard KH</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+:root {
+  --bg: #f3f5f9; --surface: #ffffff; --surface2: #ecf0f6; --fg: #111827; --muted: #566176; --line: #d6dce8;
+  --accent: #2455e6; --accent-fg: #ffffff;
+  --buy: #0d8a50; --buy-soft: rgba(13,138,80,.12);
+  --sell: #cf3030; --sell-soft: rgba(207,48,48,.11);
+  --wait: #a86a08; --wait-soft: rgba(168,106,8,.12);
+  --font: "Kantumruy Pro", "Noto Sans Khmer", "Khmer OS", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a0f1d; --surface: #111930; --surface2: #18223c; --fg: #e8ecf6; --muted: #93a0ba; --line: #26324f;
+    --accent: #6b95ff; --accent-fg: #0a0f1d;
+    --buy: #3ddc97; --buy-soft: rgba(61,220,151,.13);
+    --sell: #ff7b7b; --sell-soft: rgba(255,123,123,.13);
+    --wait: #f5bd4f; --wait-soft: rgba(245,189,79,.13);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a0f1d; --surface: #111930; --surface2: #18223c; --fg: #e8ecf6; --muted: #93a0ba; --line: #26324f;
+  --accent: #6b95ff; --accent-fg: #0a0f1d;
+  --buy: #3ddc97; --buy-soft: rgba(61,220,151,.13);
+  --sell: #ff7b7b; --sell-soft: rgba(255,123,123,.13);
+  --wait: #f5bd4f; --wait-soft: rgba(245,189,79,.13);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 15px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: max(18px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(40px, env(safe-area-inset-bottom, 0px));
+}
+.wrap { max-width: 880px; margin: 0 auto; display: grid; gap: 16px; }
+h1 { font-size: 24px; line-height: 1.25; margin: 0; }
+h2 { font-size: 16px; margin: 0 0 10px; }
+h3 { font-size: 15px; margin: 16px 0 8px; }
+.sub { color: var(--muted); margin: 2px 0 0; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; min-width: 0; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+@media (max-width: 640px) { .grid2, .grid3 { grid-template-columns: 1fr; } .grid4 { grid-template-columns: repeat(2, 1fr); } }
+label.field { display: grid; gap: 4px; font-size: 13px; color: var(--muted); min-width: 0; }
+input[type=text], input[type=number], select {
+  font: inherit; color: var(--fg); background: var(--surface2); border: 1px solid var(--line);
+  border-radius: 10px; padding: 10px 12px; width: 100%; min-width: 0;
+}
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn { font: inherit; font-weight: 600; border: 0; border-radius: 12px; padding: 13px 18px; cursor: pointer; background: var(--accent); color: var(--accent-fg); width: 100%; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn.ghost { background: var(--surface2); color: var(--fg); border: 1px solid var(--line); width: auto; padding: 8px 13px; font-weight: 500; font-size: 14px; }
+.btn.win { background: var(--buy-soft); color: var(--buy); border: 1px solid var(--buy); width: auto; padding: 7px 12px; font-size: 14px; }
+.btn.loss { background: var(--sell-soft); color: var(--sell); border: 1px solid var(--sell); width: auto; padding: 7px 12px; font-size: 14px; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.tabs { display: flex; gap: 6px; background: var(--surface2); border: 1px solid var(--line); border-radius: 12px; padding: 4px; }
+.tab { flex: 1; font: inherit; font-weight: 600; border: 0; background: transparent; color: var(--muted); padding: 9px 10px; border-radius: 9px; cursor: pointer; }
+.tab[aria-selected="true"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.14); }
+.notice { border-left: 3px solid var(--wait); background: var(--wait-soft); padding: 10px 12px; border-radius: 0 10px 10px 0; font-size: 14px; }
+.notice.danger { border-left-color: var(--sell); background: var(--sell-soft); }
+.notice.good { border-left-color: var(--buy); background: var(--buy-soft); }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { font-size: 13px; padding: 3px 10px; border-radius: 999px; background: var(--surface2); border: 1px solid var(--line); }
+.chip.buy { color: var(--buy); border-color: var(--buy); background: var(--buy-soft); }
+.chip.sell { color: var(--sell); border-color: var(--sell); background: var(--sell-soft); }
+.chip.wait { color: var(--wait); border-color: var(--wait); background: var(--wait-soft); }
+.clock { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+.calc { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+.calc div, .stat { background: var(--surface2); border-radius: 10px; padding: 10px 12px; min-width: 0; }
+.k { font-size: 12px; color: var(--muted); }
+.v { font-family: var(--mono); font-weight: 600; font-size: 17px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.pos { color: var(--buy); } .neg { color: var(--sell); }
+ul.clean { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.step { display: grid; grid-template-columns: 32px 1fr; gap: 10px; align-items: start; }
+.mark { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 14px; background: var(--surface2); border: 1px solid var(--line); }
+.mark.ok { background: var(--buy-soft); color: var(--buy); border-color: var(--buy); }
+.mark.no { background: var(--sell-soft); color: var(--sell); border-color: var(--sell); }
+.mark.opt { background: var(--wait-soft); color: var(--wait); border-color: var(--wait); }
+.step .name { font-weight: 600; }
+.step .note { color: var(--muted); font-size: 14px; }
+.step input[type=checkbox] { width: 22px; height: 22px; margin: 3px; accent-color: var(--accent); }
+.verdict { border-radius: 14px; padding: 16px; border: 1px solid var(--line); display: grid; gap: 4px; }
+.verdict.go { background: var(--buy-soft); border-color: var(--buy); }
+.verdict.stop { background: var(--sell-soft); border-color: var(--sell); }
+.verdict .big { font-size: 24px; font-weight: 700; line-height: 1.25; }
+.verdict.go .big { color: var(--buy); } .verdict.stop .big { color: var(--sell); }
+.trade { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface2); }
+.trade .top { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+.meta { color: var(--muted); font-size: 13px; }
+.closeform { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.closeform input { width: 96px; padding: 7px 10px; }
+.eq { width: 100%; height: 90px; display: block; }
+.tbl { overflow-x: auto; }
+table.t { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.t th, table.t td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.foot { color: var(--muted); font-size: 13px; }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.drop { position: relative; display: grid; place-items: center; text-align: center; gap: 6px; min-height: 160px; padding: 14px; border: 2px dashed var(--line); border-radius: 12px; background: var(--surface2); cursor: pointer; overflow: hidden; }
+.drop:hover, .drop.over { border-color: var(--accent); }
+.drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.drop img { max-width: 100%; max-height: 220px; border-radius: 8px; display: block; }
+.drop .tag { font-weight: 700; }
+.zone { display: grid; gap: 2px; padding: 10px 12px; border-radius: 10px; background: var(--surface2); }
+.zone .zr { font-family: var(--mono); font-size: 14px; }
+.zone.buy .zt { color: var(--buy); font-weight: 700; } .zone.sell .zt { color: var(--sell); font-weight: 700; }
+.verdict.wait { background: var(--wait-soft); border-color: var(--wait); }
+.verdict.wait .big { color: var(--wait); } .verdict.buy { background: var(--buy-soft); border-color: var(--buy); } .verdict.buy .big { color: var(--buy); }
+.verdict.sell { background: var(--sell-soft); border-color: var(--sell); } .verdict.sell .big { color: var(--sell); }
+[hidden] { display: none !important; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>ICT Trade Guard KH</h1>
+    <p class="sub">ពិនិត្យមុនចូល គណនា Lot កត់ត្រា Trade និងការពារលុយ ជាភាសាខ្មែរ</p>
+    <div class="clock" id="clock"></div>
+  </header>
+
+  <div id="lockBanner" hidden></div>
+
+  <div class="tabs" role="tablist" aria-label="ផ្នែក">
+    <button class="tab" role="tab" id="tabA" aria-selected="true" aria-controls="viewA">ពិនិត្យមុនចូល</button>
+    <button class="tab" role="tab" id="tabI" aria-selected="false" aria-controls="viewI">វិភាគរូប (AI)</button>
+    <button class="tab" role="tab" id="tabJ" aria-selected="false" aria-controls="viewJ">កំណត់ត្រា Trade</button>
+  </div>
+
+  <!-- ===== ពិនិត្យមុនចូល ===== -->
+  <div id="viewA" style="display:grid;gap:16px" role="tabpanel" aria-labelledby="tabA">
+    <section class="card">
+      <h2>ផែនការ Trade</h2>
+      <div class="grid3">
+        <label class="field" for="symbol">Symbol<input type="text" id="symbol" value="XAUUSD" autocomplete="off"></label>
+        <label class="field" for="dir">ទិស<select id="dir"><option value="buy">ទិញ</option><option value="sell">លក់</option></select></label>
+        <label class="field" for="entry">Entry<input type="number" id="entry" step="any" inputmode="decimal"></label>
+      </div>
+      <div class="grid3" style="margin-top:12px">
+        <label class="field" for="sl">SL<input type="number" id="sl" step="any" inputmode="decimal"></label>
+        <label class="field" for="tp1">TP1<input type="number" id="tp1" step="any" inputmode="decimal"></label>
+        <label class="field" for="tp2">TP2 (ជម្រើស)<input type="number" id="tp2" step="any" inputmode="decimal"></label>
+      </div>
+      <div class="grid3" style="margin-top:12px">
+        <label class="field" for="bal">ទុន (USD)<input type="number" id="bal" value="100" min="1" step="1" inputmode="decimal"></label>
+        <label class="field" for="risk">Risk ក្នុងមួយ Trade (%)<input type="number" id="risk" value="1" min="0.1" max="5" step="0.1" inputmode="decimal"></label>
+        <label class="field" for="ct">Contract size (មាស = 100)<input type="number" id="ct" value="100" min="1" step="1" inputmode="decimal"></label>
+      </div>
+      <div class="calc" id="calc" style="margin-top:14px"></div>
+    </section>
+
+    <section class="card">
+      <h2>ICT 5 ជំហាន (ធីកតាមអ្វីដែលបងឃើញលើ Chart)</h2>
+      <ul class="clean" id="steps"></ul>
+    </section>
+
+    <section class="card">
+      <h2>ច្បាប់ការពារ</h2>
+      <ul class="clean" id="rules"></ul>
+    </section>
+
+    <div id="verdict"></div>
+
+    <div class="row">
+      <button class="btn" id="saveOpen" style="flex:1">រក្សាទុកជា Trade ដែលបើក</button>
+    </div>
+    <div class="foot" id="saveMsg" role="status"></div>
+  </div>
+
+  <!-- ===== កំណត់ត្រា ===== -->
+  <div id="viewJ" style="display:grid;gap:16px" role="tabpanel" aria-labelledby="tabJ" hidden>
+    <div id="jMsg" class="notice" hidden></div>
+
+    <section class="card">
+      <h2>ស្ថិតិ (Trade ដែលបិទរួច)</h2>
+      <div class="grid4" id="stats"></div>
+      <svg class="eq" id="eq" viewBox="0 0 300 90" preserveAspectRatio="none" role="img" aria-label="ខ្សែកោងលទ្ធផលសុទ្ធ R" style="margin-top:12px" hidden></svg>
+      <div id="sampleNote" class="foot" style="margin-top:8px"></div>
+      <div class="tbl" id="groups" style="margin-top:12px"></div>
+    </section>
+
+    <section class="card">
+      <h2>បន្ថែម Trade ដោយដៃ</h2>
+      <div class="grid3">
+        <label class="field" for="aSym">Symbol<input type="text" id="aSym" value="XAUUSD" autocomplete="off"></label>
+        <label class="field" for="aDir">ទិស<select id="aDir"><option value="buy">ទិញ</option><option value="sell">លក់</option></select></label>
+        <label class="field" for="aRes">លទ្ធផល<select id="aRes"><option value="win">ឈ្នះ</option><option value="loss">ចាញ់</option><option value="be">ស្មើ (BE)</option></select></label>
+      </div>
+      <div class="grid3" style="margin-top:12px">
+        <label class="field" for="aR">R ពិត (ទទេ: ឈ្នះ +1.5, ចាញ់ −1, BE 0)<input type="number" id="aR" step="0.1" inputmode="decimal" placeholder="ឧ. 1.5"></label>
+        <label class="field" for="aKz">Killzone ពេលចូល<select id="aKz"><option>London</option><option>New York</option><option>Asia</option><option>ក្រៅម៉ោង</option></select></label>
+        <label class="field" for="aNote">កំណត់ចំណាំ<input type="text" id="aNote" autocomplete="off" maxlength="200"></label>
+      </div>
+      <div style="margin-top:12px"><button class="btn" id="aSave">រក្សាទុក Trade</button></div>
+    </section>
+
+    <section class="card">
+      <h2>Trade ទាំងអស់</h2>
+      <div id="tradeList" style="display:grid;gap:10px"></div>
+    </section>
+
+    <section class="card">
+      <h2>ដែនកំណត់ការពារប្រចាំថ្ងៃ និងបម្រុងទុក</h2>
+      <div class="grid2">
+        <label class="field" for="limStreak">ឈប់ពេលចាញ់ជាប់គ្នា (ដង)<input type="number" id="limStreak" value="2" min="1" max="10" step="1" inputmode="numeric"></label>
+        <label class="field" for="limDay">ឈប់ពេលខាតសរុបថ្ងៃនេះដល់ (R)<input type="number" id="limDay" value="2" min="0.5" max="10" step="0.5" inputmode="decimal"></label>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn ghost" id="expCsv">ទាញយក CSV</button>
+        <button class="btn ghost" id="expJson">បម្រុងទុក (JSON)</button>
+        <label class="btn ghost" for="impJson" style="cursor:pointer">ស្តារពីបម្រុងទុក</label>
+        <input type="file" id="impJson" accept="application/json,.json" hidden>
+      </div>
+      <p class="foot" style="margin-bottom:0">ទិន្នន័យរក្សាទុកក្នុង Browser នៃឧបករណ៍នេះប៉ុណ្ណោះ។ បើលុយទិន្នន័យ Browser ឬដូរទូរស័ព្ទ ទិន្នន័យនឹងបាត់ ដូច្នេះសូមបម្រុងទុកជាប្រចាំ។</p>
+    </section>
+  </div>
+
+  <!-- ===== វិភាគរូប AI ===== -->
+  <div id="viewI" style="display:grid;gap:16px" role="tabpanel" aria-labelledby="tabI" hidden>
+    <section class="card">
+      <h2>ការកំណត់ AI (ប្រើកូនសោ API របស់បងផ្ទាល់)</h2>
+      <div class="notice danger" style="margin-bottom:12px"><b>មិនឥតគិតថ្លៃ។</b> ការវិភាគនីមួយៗចំណាយលុយពីគណនី Claude Console របស់បង (ប្រហែលជាសេនពីរបីក្នុងមួយដង ទៅតាមម៉ូដែល និងទំហំរូប សូមពិនិត្យតម្លៃក្នុង Console)។ ដាក់ដែនកំណត់ចំណាយក្នុង Console ជាមុន។ កូនសោរក្សាទុកតែក្នុង Browser នេះ។ កុំប្រើលើឧបករណ៍ដែលអ្នកដទៃប្រើរួម។</div>
+      <div class="grid2">
+        <label class="field" for="aiKey">កូនសោ API (sk-ant-...)<input type="password" id="aiKey" autocomplete="off" spellcheck="false"></label>
+        <label class="field" for="aiModel">ឈ្មោះម៉ូដែល<input type="text" id="aiModel" value="claude-sonnet-5-5" autocomplete="off" spellcheck="false"></label>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <label class="row" style="gap:8px;color:var(--muted)"><input type="checkbox" id="aiRemember"> ចាំកូនសោក្នុងឧបករណ៍នេះ</label>
+        <button class="btn ghost" id="aiClear">លុបកូនសោ</button>
+      </div>
+      <p class="foot" style="margin-bottom:0">យកកូនសោពី console.anthropic.com។ កូនសោមិនរួមបញ្ចូលក្នុងឯកសារបម្រុងទុកទេ។</p>
+    </section>
+
+    <section class="grid2" aria-label="រូប Chart">
+      <div class="card">
+        <h2>១. Chart ធំ (HTF)</h2>
+        <label class="drop" id="dropHtf"><input type="file" id="fileHtf" accept="image/*"><div id="prevHtf"><div class="tag">ចុចដើម្បីជ្រើសរូប</div><div class="foot">ឬអូសមកដាក់ ឬថតពីកាមេរ៉ា</div></div></label>
+        <label class="field" for="aiHtf" style="margin-top:10px">Timeframe<select id="aiHtf"><option>D1</option><option selected>4H</option><option>1H</option></select></label>
+      </div>
+      <div class="card">
+        <h2>២. Chart តូច (LTF)</h2>
+        <label class="drop" id="dropLtf"><input type="file" id="fileLtf" accept="image/*"><div id="prevLtf"><div class="tag">ចុចដើម្បីជ្រើសរូប</div><div class="foot">ឬអូសមកដាក់ ឬថតពីកាមេរ៉ា</div></div></label>
+        <label class="field" for="aiLtf" style="margin-top:10px">Timeframe<select id="aiLtf"><option>1H</option><option selected>15M</option><option>5M</option></select></label>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="notice" style="margin-bottom:12px">ឲ្យមើលឃើញ <b>មាត្រតម្លៃខាងស្តាំ</b> និង <b>ម៉ោងខាងក្រោម</b> ទាំងស្រុង ហើយឲ្យឃើញ Candle ចុងក្រោយ។</div>
+      <button class="btn" id="aiGo" disabled>វិភាគ Chart</button>
+      <div class="row" style="margin-top:10px"><span class="foot" id="aiStatus" role="status">សូមដាក់កូនសោ និងរូបទាំងពីរ</span><button class="btn ghost" id="aiStop" hidden>បញ្ឈប់</button></div>
+    </section>
+
+    <section id="aiOut" aria-live="polite" style="display:grid;gap:16px"></section>
+  </div>
+
+  <p class="foot">កម្មវិធីនេះជាឧបករណ៍ជំនួយវិន័យ មិនមែនសញ្ញាទិញលក់ ហើយមិនមែនជាដំបូន្មានវិនិយោគទេ។ គ្មាន AI វិភាគក្នុងនេះ មិនធានាថាឈ្នះ។ ត្រូវមាន SL ជានិច្ច ហើយសាកល្បងលើ Demo សិន។</p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var KEY = 'ict_guard_v1';
+  var $ = function (id) { return document.getElementById(id); };
+  var db = { trades: [], prefs: { symbol: 'XAUUSD', bal: 100, risk: 1, ct: 100, limStreak: 2, limDay: 2 } };
+  var storageOk = true;
+  var manual = { s1: false, s2: false, s3: false, s4: false, news: false, slset: false };
+  var lockInfo = { locked: false, text: '', count: 0, net: 0 };
+  var delArm = {};
+
+  /* ---------- ជំនួយ ---------- */
+  function h(tag, props) {
+    var e = document.createElement(tag);
+    props = props || {};
+    Object.keys(props).forEach(function (k) {
+      var v = props[k];
+      if (k === 'class') e.className = v;
+      else if (k === 'text') e.textContent = v;
+      else if (k.indexOf('on') === 0) e.addEventListener(k.slice(2), v);
+      else e.setAttribute(k, v);
+    });
+    for (var i = 2; i < arguments.length; i++) {
+      [].concat(arguments[i]).forEach(function (kid) {
+        if (kid == null || kid === false) return;
+        e.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+      });
+    }
+    return e;
+  }
+  function num(v) { var n = typeof v === 'number' ? v : parseFloat(String(v == null ? '' : v).replace(/,/g, '')); return isFinite(n) ? n : NaN; }
+  function fmt(n) { return isFinite(n) ? n.toLocaleString('en-US', { maximumFractionDigits: 2 }) : '—'; }
+  function fmtR(n) { return (n > 0 ? '+' : '') + (Math.round(n * 100) / 100).toFixed(2); }
+  function newId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  var DIRT = { buy: 'ទិញ', sell: 'លក់' };
+
+  /* ---------- ការរក្សាទុក ---------- */
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) {
+        var d = JSON.parse(raw);
+        if (d && Array.isArray(d.trades)) db.trades = d.trades;
+        if (d && d.prefs) Object.keys(d.prefs).forEach(function (k) { db.prefs[k] = d.prefs[k]; });
+      }
+    } catch (e) { storageOk = false; }
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(db)); storageOk = true; }
+    catch (e) { storageOk = false; }
+    if (!storageOk) jmsg('Browser នេះមិនអនុញ្ញាតឲ្យរក្សាទុកទិន្នន័យទេ (ប្រហែលជារបៀបឯកជន)។ ទិន្នន័យនឹងបាត់ពេលបិទទំព័រ សូមទាញយកបម្រុងទុក។', true);
+  }
+  function jmsg(text, danger) {
+    var m = $('jMsg');
+    if (!text) { m.hidden = true; return; }
+    m.hidden = false; m.textContent = text; m.className = 'notice' + (danger ? ' danger' : '');
+  }
+
+  /* ---------- Tab ---------- */
+  function showTab(which) {
+    ['A', 'I', 'J'].forEach(function (k) {
+      $('view' + k).hidden = k !== which;
+      $('tab' + k).setAttribute('aria-selected', String(k === which));
+    });
+  }
+  $('tabA').addEventListener('click', function () { showTab('A'); });
+  $('tabI').addEventListener('click', function () { showTab('I'); });
+  $('tabJ').addEventListener('click', function () { showTab('J'); });
+
+  /* ---------- ម៉ោង New York ---------- */
+  function nyNow() {
+    var parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'short', hour: 'numeric', hourCycle: 'h23' }).formatToParts(new Date());
+    var wd = '', hr = 0;
+    parts.forEach(function (p) { if (p.type === 'weekday') wd = p.value; if (p.type === 'hour') hr = parseInt(p.value, 10) % 24; });
+    return { wd: wd, hr: hr };
+  }
+  function marketState() {
+    var t = nyNow();
+    var closed = (t.wd === 'Fri' && t.hr >= 17) || t.wd === 'Sat' || (t.wd === 'Sun' && t.hr < 17);
+    var opening = t.wd === 'Sun' && t.hr >= 17 && t.hr < 19;
+    var kz = (t.hr >= 2 && t.hr < 5) ? 'London' : (t.hr >= 7 && t.hr < 10) ? 'New York' : '';
+    var label = kz || (t.hr >= 20 ? 'Asia' : 'ក្រៅម៉ោង');
+    return { closed: closed, opening: opening, kz: kz, label: label, hr: t.hr, wd: t.wd };
+  }
+  function updateClock() {
+    var m = marketState();
+    var box = $('clock'); box.replaceChildren();
+    box.append(
+      h('span', { class: 'chip', text: 'ម៉ោង New York ' + m.hr + ':00' }),
+      h('span', { class: 'chip ' + (m.kz ? 'buy' : 'wait'), text: m.kz ? 'ក្នុង Killzone ' + m.kz : 'ក្រៅ Killzone (' + m.label + ')' }),
+      m.closed ? h('span', { class: 'chip sell', text: 'ទីផ្សារមាសបិទ' }) : m.opening ? h('span', { class: 'chip wait', text: 'ទើបបើកទីផ្សារ' }) : null);
+  }
+
+  /* ---------- ការគណនា ---------- */
+  function plan() {
+    var dir = $('dir').value;
+    var e = num($('entry').value), s = num($('sl').value), t1 = num($('tp1').value), t2 = num($('tp2').value);
+    var valid = isFinite(e) && isFinite(s) && isFinite(t1) && (dir === 'buy' ? (s < e && e < t1) : (s > e && e > t1));
+    var dist = Math.abs(e - s);
+    var rr1 = valid ? Math.abs(t1 - e) / dist : NaN;
+    var t2ok = valid && isFinite(t2) && (dir === 'buy' ? t2 > t1 : t2 < t1);
+    var rr2 = t2ok ? Math.abs(t2 - e) / dist : NaN;
+    var bal = num($('bal').value), rk = num($('risk').value), ct = num($('ct').value);
+    var riskUsd = isFinite(bal) && isFinite(rk) ? bal * rk / 100 : NaN;
+    var lot = valid && isFinite(riskUsd) && isFinite(ct) && dist > 0 ? Math.floor((riskUsd / (dist * ct)) * 100) / 100 : NaN;
+    return { dir: dir, e: e, s: s, t1: t1, t2: t2, valid: valid, dist: dist, rr1: rr1, rr2: rr2, rk: rk, riskUsd: riskUsd, lot: lot };
+  }
+  function renderCalc(p) {
+    var box = $('calc'); box.replaceChildren();
+    function cell(k, v, cls) { return h('div', {}, h('div', { class: 'k', text: k }), h('div', { class: 'v ' + (cls || ''), text: v })); }
+    box.append(
+      cell('ចម្ងាយ SL', p.valid ? fmt(p.dist) : '—'),
+      cell('RR ទៅ TP1', p.valid ? fmt(p.rr1) : '—', p.valid && p.rr1 >= 1.5 ? 'pos' : p.valid ? 'neg' : ''),
+      cell('RR ទៅ TP2', isFinite(p.rr2) ? fmt(p.rr2) : '—'),
+      cell('Risk ($)', isFinite(p.riskUsd) ? '$' + fmt(p.riskUsd) : '—'),
+      cell('Lot ប្រហែល', !p.valid ? '—' : (p.lot >= 0.01 ? p.lot.toFixed(2) : '< 0.01'), p.valid && p.lot < 0.01 ? 'neg' : ''));
+  }
+
+  /* ---------- ជំហាន និងច្បាប់ ---------- */
+  var STEPS = [
+    { key: 's1', name: '① Liquidity: តម្លៃបោស High/Low (SSL/BSL) រួចហើយ', note: 'ទិញ = បោសក្រោម (SSL) ហើយបិទត្រឡប់ឡើង។ លក់ = បោសលើ (BSL) ហើយបិទត្រឡប់ចុះ។', req: true },
+    { key: 's2', name: '② ប្តូរទិស: មាន CHoCH, CISD ឬ Heikin Ashi ប្តូរពណ៌', note: 'ត្រូវមានយ៉ាងហោចណាស់មួយ ក្រោយការបោស។', req: true },
+    { key: 's3', name: '③ SMT: ទីផ្សារទាក់ទង (ប្រាក់ ឬ DXY) មិនធ្វើតាម', note: 'ជម្រើស ជួយឲ្យសញ្ញារឹងមាំជាង ប៉ុន្តែមិនបង្ខំ។', req: false },
+    { key: 's4', name: '④ Retest: តម្លៃប៉ះ OB/FVG/BPR/OTE ហើយមាន Candle បញ្ជាក់', note: 'មិនមែនចូលកណ្តាលផ្លូវ។ ចាំតម្លៃត្រឡប់មកតំបន់។', req: true },
+    { key: 'news', name: 'ឆ្ងាយពីព័ត៌មានធំ (FOMC, NFP, CPI) យ៉ាងតិច 30 នាទី', note: 'ពិនិត្យប្រតិទិនសេដ្ឋកិច្ចដោយខ្លួនឯង។', req: true },
+    { key: 'slset', name: 'ខ្ញុំនឹងដាក់ SL ក្នុង Order ពេលចូល', note: 'កុំចូលដោយគ្មាន SL។', req: true }
+  ];
+  function renderSteps() {
+    var ul = $('steps'); ul.replaceChildren();
+    STEPS.forEach(function (s) {
+      var cb = h('input', { type: 'checkbox', id: 'cb_' + s.key });
+      cb.checked = !!manual[s.key];
+      cb.addEventListener('change', function () { manual[s.key] = cb.checked; renderVerdict(); });
+      ul.append(h('li', { class: 'step' }, cb,
+        h('div', {}, h('label', { class: 'name', for: 'cb_' + s.key, text: s.name + (s.req ? '' : ' (ជម្រើស)') }), h('div', { class: 'note', text: s.note }))));
+    });
+  }
+  function rulesList(p) {
+    var m = marketState();
+    var rrOk = p.valid && p.rr1 >= 1.5;
+    var rkOk = isFinite(p.rk) && p.rk <= 1;
+    return [
+      { ok: !!m.kz, name: 'ក្នុង Killzone (London ឬ New York)', note: m.kz ? 'ឥឡូវក្នុង ' + m.kz : 'ឥឡូវ ' + m.label + ' (New York ' + m.hr + ':00) ក្រៅ London 02-05 និង New York 07-10' },
+      { ok: !m.closed && !m.opening, name: 'ទីផ្សារបើកធម្មតា', note: m.closed ? 'ទីផ្សារមាសបិទ (ចុងសប្តាហ៍)' : m.opening ? 'ទើបបើកទីផ្សារ Spread ធំ ចាំ 2 ម៉ោង' : 'មិនមែនចុងសប្តាហ៍ ឬទើបបើក' },
+      { ok: p.valid, name: 'Entry, SL, TP1 ត្រឹមត្រូវតាមទិស', note: p.valid ? 'SL ' + fmt(p.dist) + ' ចំណុចពី Entry' : 'បញ្ចូល Entry, SL, TP1 ឲ្យត្រូវទិស (ទិញ: SL < Entry < TP1)' },
+      { ok: rrOk, name: 'RR ទៅ TP1 យ៉ាងតិច 1.5', note: p.valid ? 'RR = ' + fmt(p.rr1) : '—' },
+      { ok: p.valid && p.lot >= 0.01, name: 'Lot យ៉ាងតិច 0.01 តាម Risk របស់បង', note: !p.valid ? '—' : p.lot >= 0.01 ? 'Lot ប្រហែល ' + p.lot.toFixed(2) : 'SL ឆ្ងាយពេកសម្រាប់ទុននេះ ត្រូវរង់ចាំ SL ជិតជាងនេះ ឬកុំចូល' },
+      { ok: rkOk, name: 'Risk ក្នុងមួយ Trade មិនលើស 1%', note: 'ការកំណត់របស់បង: ' + (isFinite(p.rk) ? p.rk + '%' : '—') },
+      { ok: !lockInfo.locked, name: 'មិនទាន់ដល់ដែនកំណត់ខាតថ្ងៃនេះ', note: lockInfo.locked ? lockInfo.text : 'ថ្ងៃនេះ ' + lockInfo.count + ' Trade បិទរួច (' + fmtR(lockInfo.net) + 'R)' }
+    ];
+  }
+  function renderVerdict() {
+    var p = plan();
+    renderCalc(p);
+    var rules = rulesList(p);
+    var ul = $('rules'); ul.replaceChildren();
+    rules.forEach(function (r) {
+      ul.append(h('li', { class: 'step' }, h('div', { class: 'mark ' + (r.ok ? 'ok' : 'no'), text: r.ok ? '✓' : '✕' }),
+        h('div', {}, h('div', { class: 'name', text: r.name }), h('div', { class: 'note', text: r.note }))));
+    });
+    var missing = [];
+    STEPS.forEach(function (s) { if (s.req && !manual[s.key]) missing.push(s.name.replace(/^[①-④]\s*/, '')); });
+    rules.forEach(function (r) { if (!r.ok) missing.push(r.name); });
+    var ready = missing.length === 0;
+    var v = $('verdict'); v.replaceChildren();
+    if (ready) {
+      v.append(h('div', { class: 'verdict go' }, h('div', { class: 'big', text: 'ត្រៀមចូលតាមច្បាប់' }),
+        h('div', { text: 'លក្ខខណ្ឌទាំងអស់ពេញ។ ចូលជាមួយ SL និង Lot ' + (p.lot >= 0.01 ? p.lot.toFixed(2) : '—') + ' ប៉ុណ្ណោះ។ នេះមិនធានាថាឈ្នះទេ។' })));
+    } else {
+      v.append(h('div', { class: 'verdict stop' }, h('div', { class: 'big', text: 'កុំទាន់ចូល (ខ្វះ ' + missing.length + ' យ៉ាង)' }),
+        h('ul', { style: 'margin:6px 0 0;padding-left:18px' }, missing.map(function (m) { return h('li', { text: m }); }))));
+    }
+    renderVerdict.ready = ready;
+    $('saveOpen').disabled = !p.valid;
+  }
+
+  /* ---------- Trade ---------- */
+  function isClosed(t) { return t.status === 'win' || t.status === 'loss' || t.status === 'be'; }
+  function rOf(t) { var r = num(t.r); return isFinite(r) ? r : (t.status === 'loss' ? -1 : 0); }
+  function resultR(res, rIn, fallbackWin) {
+    if (isFinite(rIn)) return res === 'loss' ? -Math.abs(rIn) : res === 'be' ? 0 : Math.abs(rIn);
+    return res === 'win' ? (fallbackWin || 1.5) : res === 'loss' ? -1 : 0;
+  }
+  function saveOpenTrade() {
+    var p = plan();
+    if (!p.valid) { $('saveMsg').textContent = 'សូមបញ្ចូល Entry, SL, TP1 ឲ្យត្រូវទិសសិន'; return; }
+    var steps = ['s1', 's2', 's3', 's4'].filter(function (k) { return manual[k]; }).length;
+    db.trades.unshift({
+      id: newId(), ts: Date.now(), sym: ($('symbol').value || '').toUpperCase(), dir: p.dir,
+      entry: p.e, sl: p.s, tp1: p.t1, tp2: isFinite(p.t2) ? p.t2 : null, rr: Math.round(p.rr1 * 100) / 100,
+      status: 'open', r: null, kz: marketState().label, ready: !!renderVerdict.ready, steps: steps, note: ''
+    });
+    save();
+    $('saveMsg').textContent = 'បានរក្សាទុក។ ចូលទៅ Tab កំណត់ត្រា ដើម្បីបិទ Trade ពេលចប់។';
+    manual = { s1: false, s2: false, s3: false, s4: false, news: false, slset: false };
+    renderSteps(); renderAll();
+  }
+  function addManual() {
+    var res = $('aRes').value;
+    var r = resultR(res, num($('aR').value), 1.5);
+    db.trades.unshift({
+      id: newId(), ts: Date.now(), sym: ($('aSym').value || '').toUpperCase(), dir: $('aDir').value,
+      entry: null, sl: null, tp1: null, tp2: null, rr: null, status: res, r: r, kz: $('aKz').value, ready: null, steps: null,
+      note: $('aNote').value.slice(0, 200)
+    });
+    save(); $('aR').value = ''; $('aNote').value = ''; renderAll();
+  }
+  function closeTrade(t, res, rIn) {
+    t.r = resultR(res, rIn, num(t.rr) || 1);
+    t.status = res; t.closedTs = Date.now();
+    save(); renderAll();
+  }
+  function removeTrade(t, btn) {
+    if (!delArm[t.id]) {
+      delArm[t.id] = true; btn.textContent = 'ប្រាកដ? ចុចម្តងទៀត';
+      setTimeout(function () { delArm[t.id] = false; btn.textContent = 'លុប'; }, 3000);
+      return;
+    }
+    db.trades = db.trades.filter(function (x) { return x.id !== t.id; });
+    save(); renderAll();
+  }
+
+  /* ---------- ស្ថិតិ ---------- */
+  function calcStats(list) {
+    var closed = list.filter(isClosed).sort(function (a, b) { return a.ts - b.ts; });
+    var w = 0, l = 0, b = 0, net = 0, sw = 0, sl = 0, cur = 0, max = 0, pts = [0];
+    closed.forEach(function (t) {
+      var r = rOf(t); net += r; pts.push(net);
+      if (t.status === 'win') { w++; sw += Math.max(r, 0); cur = 0; }
+      else if (t.status === 'loss') { l++; sl += Math.min(r, 0); cur++; if (cur > max) max = cur; }
+      else b++;
+    });
+    return { n: closed.length, w: w, l: l, b: b, net: net, pf: sl < 0 ? sw / Math.abs(sl) : (sw > 0 ? Infinity : NaN), exp: closed.length ? net / closed.length : NaN, cur: cur, max: max, pts: pts };
+  }
+  function sameDay(ts) { var a = new Date(ts), n = new Date(); return a.getFullYear() === n.getFullYear() && a.getMonth() === n.getMonth() && a.getDate() === n.getDate(); }
+  function computeLock() {
+    var ls = Math.max(1, num($('limStreak').value) || 2), ld = Math.abs(num($('limDay').value) || 2);
+    var today = db.trades.filter(function (t) { return isClosed(t) && sameDay(t.closedTs || t.ts); }).sort(function (a, b) { return (b.closedTs || b.ts) - (a.closedTs || a.ts); });
+    var net = 0, streak = 0, counting = true;
+    today.forEach(function (t) { net += rOf(t); if (counting) { if (t.status === 'loss') streak++; else if (t.status === 'win') counting = false; } });
+    var locked = false, text = '';
+    if (streak >= ls) { locked = true; text = 'ចាញ់ជាប់គ្នា ' + streak + ' ដងថ្ងៃនេះ។ ឈប់សម្រាក ហើយពិនិត្យ Trade ឡើងវិញ។'; }
+    else if (net <= -ld) { locked = true; text = 'ខាតសរុបថ្ងៃនេះ ' + fmtR(net) + 'R ដល់ដែនកំណត់ −' + ld + 'R។ ឈប់សម្រាកថ្ងៃនេះ។'; }
+    lockInfo = { locked: locked, text: text, count: today.length, net: net, ls: ls, ld: ld };
+  }
+  function renderBanner() {
+    var b = $('lockBanner');
+    if (lockInfo.locked) { b.hidden = false; b.className = 'notice danger'; b.textContent = 'ឈប់សម្រាកថ្ងៃនេះ: ' + lockInfo.text; }
+    else if (lockInfo.count) { b.hidden = false; b.className = 'notice'; b.textContent = 'ថ្ងៃនេះ: ' + lockInfo.count + ' Trade បិទរួច លទ្ធផលសុទ្ធ ' + fmtR(lockInfo.net) + 'R។ ដែនកំណត់: ចាញ់ជាប់គ្នា ' + lockInfo.ls + ' ដង ឬ −' + lockInfo.ld + 'R។'; }
+    else b.hidden = true;
+  }
+  function renderStats() {
+    var s = calcStats(db.trades);
+    var box = $('stats'); box.replaceChildren();
+    function stat(k, v, cls) { return h('div', { class: 'stat' }, h('div', { class: 'k', text: k }), h('div', { class: 'v ' + (cls || ''), text: v })); }
+    var wr = (s.w + s.l) > 0 ? Math.round(s.w / (s.w + s.l) * 100) + '%' : '—';
+    box.append(
+      stat('Trade បិទរួច', String(s.n)),
+      stat('ឈ្នះ / ចាញ់ / BE', s.w + ' / ' + s.l + ' / ' + s.b),
+      stat('អត្រាឈ្នះ', wr),
+      stat('លទ្ធផលសុទ្ធ (R)', s.n ? fmtR(s.net) : '—', s.net > 0 ? 'pos' : s.net < 0 ? 'neg' : ''),
+      stat('មធ្យមក្នុងមួយ Trade (R)', isFinite(s.exp) ? fmtR(s.exp) : '—', s.exp > 0 ? 'pos' : s.exp < 0 ? 'neg' : ''),
+      stat('Profit factor', s.pf === Infinity ? '∞' : isFinite(s.pf) ? s.pf.toFixed(2) : '—'),
+      stat('ចាញ់ជាប់គ្នាបច្ចុប្បន្ន', String(s.cur)),
+      stat('ចាញ់ជាប់គ្នាច្រើនបំផុត', String(s.max)));
+    $('sampleNote').textContent = s.n < 30
+      ? 'ទិន្នន័យ ' + s.n + ' Trade តិចជាង 30។ ស្ថិតិមិនទាន់គួរទុកចិត្តទេ។ កុំសន្និដ្ឋានថាវិធីល្អ ឬអាក្រក់ពីចំនួនតិចនេះ។'
+      : 'សូមមើលទាំងលទ្ធផលសុទ្ធ និងចាញ់ជាប់គ្នាច្រើនបំផុត មុនពិចារណាប្រើលុយពិត។';
+    var svg = $('eq'); svg.replaceChildren();
+    if (s.pts.length < 3) { svg.hidden = true; return; }
+    svg.hidden = false;
+    var mn = Math.min.apply(null, s.pts), mx = Math.max.apply(null, s.pts);
+    if (mn === mx) { mn -= 1; mx += 1; }
+    var pad = 6, W = 300, H = 90;
+    function X(i) { return pad + i * (W - 2 * pad) / (s.pts.length - 1); }
+    function Y(v) { return H - pad - (v - mn) * (H - 2 * pad) / (mx - mn); }
+    var ns = 'http://www.w3.org/2000/svg';
+    var zero = document.createElementNS(ns, 'line');
+    zero.setAttribute('x1', 0); zero.setAttribute('x2', W); zero.setAttribute('y1', Y(0)); zero.setAttribute('y2', Y(0));
+    zero.setAttribute('stroke', 'var(--line)'); zero.setAttribute('stroke-dasharray', '4 3'); zero.setAttribute('vector-effect', 'non-scaling-stroke');
+    var line = document.createElementNS(ns, 'polyline');
+    line.setAttribute('points', s.pts.map(function (v, i) { return X(i).toFixed(1) + ',' + Y(v).toFixed(1); }).join(' '));
+    line.setAttribute('fill', 'none'); line.setAttribute('stroke', s.net >= 0 ? 'var(--buy)' : 'var(--sell)');
+    line.setAttribute('stroke-width', '2'); line.setAttribute('vector-effect', 'non-scaling-stroke'); line.setAttribute('stroke-linejoin', 'round');
+    svg.append(zero, line);
+  }
+  function groupRows(fn) {
+    var map = {};
+    db.trades.filter(isClosed).forEach(function (t) {
+      var k = fn(t); if (k == null) return;
+      var g = map[k] || (map[k] = { name: k, n: 0, w: 0, l: 0, net: 0 });
+      g.n++; g.net += rOf(t);
+      if (t.status === 'win') g.w++; else if (t.status === 'loss') g.l++;
+    });
+    return Object.keys(map).map(function (k) { return map[k]; });
+  }
+  function renderGroups() {
+    var box = $('groups'); box.replaceChildren();
+    var sets = [
+      { title: 'តាម Killzone', rows: groupRows(function (t) { return t.kz || null; }) },
+      { title: 'តាមបញ្ជីពិនិត្យ', rows: groupRows(function (t) { return t.ready === true ? 'បញ្ជីពេញ' : t.ready === false ? 'បញ្ជីមិនពេញ' : null; }) }
+    ];
+    var any = false;
+    sets.forEach(function (s) {
+      if (!s.rows.length) return;
+      any = true;
+      var tb = h('table', { class: 't' }, h('thead', {}, h('tr', {}, h('th', { text: s.title }), h('th', { text: 'ចំនួន' }), h('th', { text: 'ឈ្នះ/ចាញ់' }), h('th', { text: 'សុទ្ធ (R)' }))));
+      var body = h('tbody');
+      s.rows.forEach(function (g) {
+        body.append(h('tr', {}, h('td', { text: g.name }), h('td', { class: 'num', text: String(g.n) }), h('td', { class: 'num', text: g.w + '/' + g.l }),
+          h('td', { class: 'num ' + (g.net > 0 ? 'pos' : g.net < 0 ? 'neg' : ''), text: fmtR(g.net) })));
+      });
+      tb.append(body); box.append(tb, h('div', { style: 'height:10px' }));
+    });
+    if (any) box.append(h('div', { class: 'foot', text: 'ក្រុមទិន្នន័យតិច (ក្រោម 30) មិនទាន់ប្រាប់អ្វីច្បាស់ទេ។' }));
+  }
+  function renderList() {
+    var box = $('tradeList'); box.replaceChildren();
+    if (!db.trades.length) { box.append(h('div', { class: 'foot', text: 'មិនទាន់មាន Trade ទេ។ បន្ថែមដោយដៃខាងលើ ឬរក្សាទុកពី Tab ពិនិត្យមុនចូល។' })); return; }
+    db.trades.slice().sort(function (a, b) { return b.ts - a.ts; }).forEach(function (t) {
+      var chipCls = t.status === 'win' ? 'chip buy' : t.status === 'loss' ? 'chip sell' : t.status === 'open' ? 'chip wait' : 'chip';
+      var chipTxt = t.status === 'win' ? 'ឈ្នះ ' + fmtR(rOf(t)) + 'R' : t.status === 'loss' ? 'ចាញ់ ' + fmtR(rOf(t)) + 'R' : t.status === 'be' ? 'ស្មើ 0R' : 'កំពុងបើក';
+      var row = h('div', { class: 'trade' },
+        h('div', { class: 'top' },
+          h('div', {}, h('b', { text: (t.sym || '') + ' ' + (DIRT[t.dir] || '') }), ' ', h('span', { class: 'meta', text: new Date(t.ts).toLocaleString() })),
+          h('span', { class: chipCls, text: chipTxt })),
+        t.entry != null ? h('div', { class: 'meta num', text: 'Entry ' + fmt(num(t.entry)) + ' · SL ' + fmt(num(t.sl)) + ' · TP1 ' + fmt(num(t.tp1)) }) : null,
+        h('div', { class: 'meta', text: [t.kz ? 'Killzone: ' + t.kz : '', t.ready === true ? 'បញ្ជីពេញ' : t.ready === false ? 'បញ្ជីមិនពេញ' : '', t.note || ''].filter(Boolean).join(' · ') }));
+      var actions = h('div', { class: 'closeform' });
+      if (t.status === 'open') {
+        var inp = h('input', { type: 'number', step: '0.1', placeholder: 'R', 'aria-label': 'R ពិត', inputmode: 'decimal' });
+        actions.append(inp,
+          h('button', { class: 'btn win', text: 'ឈ្នះ', onclick: function () { closeTrade(t, 'win', num(inp.value)); } }),
+          h('button', { class: 'btn loss', text: 'ចាញ់', onclick: function () { closeTrade(t, 'loss', num(inp.value)); } }),
+          h('button', { class: 'btn ghost', text: 'BE', onclick: function () { closeTrade(t, 'be', NaN); } }));
+      }
+      var del = h('button', { class: 'btn ghost', text: 'លុប' });
+      del.addEventListener('click', function () { removeTrade(t, del); });
+      actions.append(del); row.append(actions); box.append(row);
+    });
+  }
+  function renderAll() { computeLock(); renderBanner(); renderStats(); renderGroups(); renderList(); renderVerdict(); }
+
+  /* ---------- ទាញយក / ស្តារ ---------- */
+  function download(name, mime, text) {
+    var blob = new Blob([text], { type: mime });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name; document.body.append(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  function csvCell(v) { var s = v == null ? '' : String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+  $('expCsv').addEventListener('click', function () {
+    var cols = ['ts', 'sym', 'dir', 'entry', 'sl', 'tp1', 'tp2', 'status', 'r', 'kz', 'ready', 'steps', 'note'];
+    var lines = [cols.join(',')].concat(db.trades.map(function (t) {
+      return cols.map(function (c) { return csvCell(c === 'ts' ? new Date(t.ts).toISOString() : t[c]); }).join(',');
+    }));
+    download('trades.csv', 'text/csv;charset=utf-8', '﻿' + lines.join('\n'));
+  });
+  $('expJson').addEventListener('click', function () { download('ict-guard-backup.json', 'application/json', JSON.stringify(db)); });
+  $('impJson').addEventListener('change', function () {
+    var f = $('impJson').files && $('impJson').files[0];
+    if (!f) return;
+    var rd = new FileReader();
+    rd.onload = function () {
+      try {
+        var d = JSON.parse(String(rd.result));
+        if (!d || !Array.isArray(d.trades)) throw new Error('bad');
+        var have = {}; db.trades.forEach(function (t) { have[t.id] = true; });
+        var added = 0;
+        d.trades.forEach(function (t) { if (t && t.id && !have[t.id] && typeof t.ts === 'number') { db.trades.push(t); added++; } });
+        save(); renderAll(); jmsg('បានស្តារ ' + added + ' Trade ថ្មី។');
+      } catch (e) { jmsg('ឯកសារបម្រុងទុកមិនត្រឹមត្រូវ។', true); }
+      $('impJson').value = '';
+    };
+    rd.readAsText(f);
+  });
+
+  /* ---------- ការកំណត់ដែលចាំ ---------- */
+  function bindPrefs() {
+    var map = { bal: 'bal', risk: 'risk', ct: 'ct', limStreak: 'limStreak', limDay: 'limDay', symbol: 'symbol' };
+    Object.keys(map).forEach(function (id) {
+      var v = db.prefs[map[id]]; if (v != null) $(id).value = v;
+      $(id).addEventListener('input', function () {
+        db.prefs[map[id]] = id === 'symbol' ? $(id).value : num($(id).value);
+        save();
+        if (id === 'limStreak' || id === 'limDay') { computeLock(); renderBanner(); }
+        renderVerdict();
+      });
+    });
+    $('aSym').value = db.prefs.symbol || 'XAUUSD';
+  }
+  ['dir', 'entry', 'sl', 'tp1', 'tp2'].forEach(function (id) { $(id).addEventListener('input', renderVerdict); });
+  $('saveOpen').addEventListener('click', saveOpenTrade);
+  $('aSave').addEventListener('click', addManual);
+
+  /* ---------- វិភាគរូបដោយ AI (កូនសោរបស់អ្នកប្រើ) ---------- */
+  var AIK = 'ict_guard_key';
+  var ai = { htf: null, ltf: null, ctl: null };
+  var aiUrls = { htf: null, ltf: null };
+  function aiStatus(t) { $('aiStatus').textContent = t; }
+  function aiReady() { $('aiGo').disabled = !(ai.htf && ai.ltf && $('aiKey').value.trim() && !ai.ctl); }
+  try { var savedKey = localStorage.getItem(AIK); if (savedKey) { $('aiKey').value = savedKey; $('aiRemember').checked = true; } } catch (e) { /* ignore */ }
+  $('aiKey').addEventListener('input', function () {
+    try { if ($('aiRemember').checked) localStorage.setItem(AIK, $('aiKey').value.trim()); } catch (e) { /* ignore */ }
+    aiReady();
+  });
+  $('aiRemember').addEventListener('change', function () {
+    try { if ($('aiRemember').checked) localStorage.setItem(AIK, $('aiKey').value.trim()); else localStorage.removeItem(AIK); } catch (e) { /* ignore */ }
+  });
+  $('aiClear').addEventListener('click', function () {
+    $('aiKey').value = ''; $('aiRemember').checked = false;
+    try { localStorage.removeItem(AIK); } catch (e) { /* ignore */ }
+    aiReady(); aiStatus('បានលុបកូនសោ');
+  });
+  function aiSetFile(key, f) {
+    if (!f || !/^image\//.test(f.type)) { aiStatus('សូមជ្រើសឯកសាររូបភាព'); return; }
+    if (aiUrls[key]) URL.revokeObjectURL(aiUrls[key]);
+    ai[key] = f; aiUrls[key] = URL.createObjectURL(f);
+    $(key === 'htf' ? 'prevHtf' : 'prevLtf').replaceChildren(h('img', { src: aiUrls[key], alt: key === 'htf' ? 'Chart ធំ' : 'Chart តូច' }));
+    aiStatus(ai.htf && ai.ltf ? 'រួចរាល់ ចុច «វិភាគ Chart»' : 'សូមដាក់រូបមួយទៀត');
+    aiReady();
+  }
+  function aiWire(key, inputId, dropId) {
+    var inp = $(inputId), drop = $(dropId);
+    inp.addEventListener('change', function () { aiSetFile(key, inp.files && inp.files[0]); });
+    ['dragenter', 'dragover'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('over'); }); });
+    ['dragleave', 'drop'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove('over'); }); });
+    drop.addEventListener('drop', function (e) { aiSetFile(key, e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]); });
+  }
+  aiWire('htf', 'fileHtf', 'dropHtf');
+  aiWire('ltf', 'fileLtf', 'dropLtf');
+
+  // បង្រួមរូប (អតិបរមា 1568px) ដើម្បីកាត់បន្ថយថ្លៃ
+  function toJpegBase64(file) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      var u = URL.createObjectURL(file);
+      img.onload = function () {
+        var max = 1568, w = img.naturalWidth, hh = img.naturalHeight, sc = Math.min(1, max / Math.max(w, hh));
+        var c = document.createElement('canvas'); c.width = Math.round(w * sc); c.height = Math.round(hh * sc);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(u);
+        resolve(c.toDataURL('image/jpeg', 0.88).split(',')[1]);
+      };
+      img.onerror = function () { URL.revokeObjectURL(u); reject(new Error('image')); };
+      img.src = u;
+    });
+  }
+  function aiPrompt() {
+    var sym = ($('symbol').value || 'XAUUSD').trim();
+    return [
+      'You read trading chart screenshots for a small-capital retail trader who reads Khmer.',
+      'Image 1 is the HIGHER timeframe chart (' + $('aiHtf').value + ') and image 2 is the LOWER timeframe chart (' + $('aiLtf').value + ') of ' + sym + '.',
+      'Analyse them with the ICT 5-step model: 1 Liquidity swept (SSL/BSL); 2 direction change (CHoCH, CISD, Heikin Ashi flip); 3 SMT divergence (usually not visible in one chart, use "unknown"); 4 retest zones (FVG, OB, BPR, OTE 62-79% of the leg from the sweep extreme); 5 Killzone (London 02-05, New York 07-10 New York time; judge only if the time axis is readable, else "unknown").',
+      'Rules: Read only what is visible. Read prices from the right-hand price scale; if it is not readable, set every numeric field to null and say so in warnings. Never invent levels.',
+      'If the setup is unclear, incomplete, or price is far from a zone, direction must be "wait". Do not force a trade.',
+      'For buy/sell give entry at a retest zone, SL beyond the sweep extreme, TP1 at 1.5R or more, TP2 at the opposite liquidity, all mutually consistent.',
+      'Do not promise outcomes. Mention that live price and news (e.g. FOMC) are not visible in a screenshot when relevant.',
+      'Write every text field in Khmer (terms like OB, FVG, SL, TP, SSL, BSL may stay in English), 1 to 2 short sentences each.',
+      'Reply with only one JSON object: {"readable":true,"bias":"up|down|unclear","biasReason":"Khmer","direction":"buy|sell|wait","directionReason":"Khmer",' +
+        '"steps":[{"n":1,"name":"Khmer","status":"ok|partial|no|unknown","note":"Khmer"}, five items],' +
+        '"zones":[{"type":"OB|FVG|BPR|OTE|Liquidity","side":"buy|sell","low":number or null,"high":number or null,"note":"Khmer"}],' +
+        '"plan":{"entry":number or null,"sl":number or null,"tp1":number or null,"tp2":number or null,"invalidation":"Khmer"},' +
+        '"confidence":"low|medium|high","warnings":["Khmer"],"nextStep":"Khmer"}'
+    ].join('\n');
+  }
+  var AIERR = {
+    401: 'កូនសោ API មិនត្រឹមត្រូវ ឬអស់សុពលភាព។ សូមពិនិត្យក្នុង Console។',
+    403: 'កូនសោមិនមានសិទ្ធិប្រើ ឬម៉ូដែលមិនអនុញ្ញាត។',
+    404: 'រកម៉ូដែលមិនឃើញ។ សូមពិនិត្យឈ្មោះម៉ូដែលក្នុងការកំណត់។',
+    413: 'រូបធំពេក។ សូមប្រើរូបតូចជាងនេះ។',
+    429: 'ហៅញឹកញាប់ពេក ឬអស់ឥណទាន។ សូមពិនិត្យសមតុល្យក្នុង Console ហើយរង់ចាំបន្តិច។',
+    529: 'ម៉ាស៊ីនបម្រើរវល់។ សូមព្យាយាមម្តងទៀតបន្តិចក្រោយ។'
+  };
+  function parseJson(text) {
+    var a = text.indexOf('{'), b = text.lastIndexOf('}');
+    if (a < 0 || b <= a) throw new Error('nojson');
+    return JSON.parse(text.slice(a, b + 1));
+  }
+  async function aiAnalyze() {
+    if (ai.ctl) return;
+    var key = $('aiKey').value.trim();
+    if (!key || !ai.htf || !ai.ltf) return;
+    ai.ctl = new AbortController();
+    $('aiGo').disabled = true; $('aiStop').hidden = false; $('aiOut').replaceChildren();
+    var t0 = Date.now();
+    aiStatus('កំពុងវិភាគ... 0 វិនាទី');
+    var timer = setInterval(function () { aiStatus('កំពុងវិភាគ... ' + Math.round((Date.now() - t0) / 1000) + ' វិនាទី'); }, 1000);
+    try {
+      var b64 = await Promise.all([toJpegBase64(ai.htf), toJpegBase64(ai.ltf)]);
+      var res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST', signal: ai.ctl.signal,
+        headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+        body: JSON.stringify({
+          model: ($('aiModel').value || 'claude-sonnet-5-5').trim(), max_tokens: 3000,
+          messages: [{ role: 'user', content: [
+            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64[0] } },
+            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64[1] } },
+            { type: 'text', text: aiPrompt() }] }]
+        })
+      });
+      if (!res.ok) { var er = new Error('http'); er.status = res.status; throw er; }
+      var body = await res.json();
+      var text = (body.content || []).map(function (c) { return c.text || ''; }).join('');
+      var d = parseJson(text);
+      renderAI(d, body.usage);
+      aiStatus('រួចរាល់ ' + new Date().toLocaleTimeString());
+    } catch (e) {
+      var msg;
+      if (e && e.name === 'AbortError') msg = null;
+      else if (e && e.status) msg = AIERR[e.status] || ('មានបញ្ហា (កូដ ' + e.status + ')។ សូមព្យាយាមម្តងទៀត។');
+      else if (e && e.message === 'nojson') msg = 'ចម្លើយមិនមានទម្រង់ត្រឹមត្រូវ។ សូមចុចវិភាគម្តងទៀត។';
+      else if (e && e.message === 'image') msg = 'អានរូបមិនបាន។ សូមជ្រើសរូបផ្សេង។';
+      else msg = 'ភ្ជាប់ទៅ AI មិនបាន។ សូមពិនិត្យអ៊ីនធឺណិត ហើយព្យាយាមម្តងទៀត។';
+      aiStatus(msg ? 'បរាជ័យ' : 'បានបញ្ឈប់');
+      if (msg) $('aiOut').replaceChildren(h('div', { class: 'notice danger', text: msg }));
+    } finally {
+      clearInterval(timer); ai.ctl = null; $('aiStop').hidden = true; aiReady();
+    }
+  }
+  $('aiGo').addEventListener('click', aiAnalyze);
+  $('aiStop').addEventListener('click', function () { if (ai.ctl) ai.ctl.abort(); });
+
+  var AI_BIAS = { up: 'ទិសធំ ឡើង', down: 'ទិសធំ ចុះ', unclear: 'ទិសធំ មិនច្បាស់' };
+  var AI_CONF = { low: 'ទំនុកចិត្តទាប', medium: 'ទំនុកចិត្តមធ្យម', high: 'ទំនុកចិត្តខ្ពស់' };
+  var AI_DIR = { buy: 'ទិញ', sell: 'លក់', wait: 'រង់ចាំ' };
+  function renderAI(d, usage) {
+    var out = $('aiOut'); out.replaceChildren();
+    var dir = AI_DIR[d.direction] ? d.direction : 'wait';
+    var p = d.plan || {};
+    var e = num(p.entry), s = num(p.sl), t1 = num(p.tp1), t2 = num(p.tp2);
+    var ok = (dir === 'buy' || dir === 'sell') && isFinite(e) && isFinite(s) && isFinite(t1) && (dir === 'buy' ? (s < e && e < t1) : (s > e && e > t1));
+    var warns = Array.isArray(d.warnings) ? d.warnings.filter(Boolean).slice() : [];
+    if (d.readable === false) warns.unshift('រូបអានមិនច្បាស់ ការវិភាគអាចមិនត្រឹមត្រូវ។');
+    if ((dir === 'buy' || dir === 'sell') && !ok) warns.unshift('លេខ Entry, SL, TP មិនសមហេតុផលគ្នា ឬអានមិនបាន ដូច្នេះមិនបង្ហាញផែនការ។ សូមពិនិត្យ Chart ដោយខ្លួនឯង។');
+
+    out.append(h('div', { class: 'verdict ' + dir },
+      h('div', { class: 'foot', text: 'សេចក្តីសន្និដ្ឋានពី AI' }),
+      h('div', { class: 'big', text: AI_DIR[dir] }),
+      h('div', { text: d.directionReason || '' }),
+      h('div', { class: 'row' }, h('span', { class: 'chip', text: AI_BIAS[d.bias] || AI_BIAS.unclear }), h('span', { class: 'chip', text: AI_CONF[d.confidence] || AI_CONF.low })),
+      d.biasReason ? h('div', { class: 'foot', text: d.biasReason }) : null));
+
+    if (ok) {
+      var dist = Math.abs(e - s);
+      var card = h('div', { class: 'card' }, h('h2', { text: 'ផែនការ (ប្រហែល)' }),
+        h('div', { class: 'calc' },
+          h('div', {}, h('div', { class: 'k', text: 'Entry' }), h('div', { class: 'v', text: fmt(e) })),
+          h('div', {}, h('div', { class: 'k', text: 'SL' }), h('div', { class: 'v neg', text: fmt(s) })),
+          h('div', {}, h('div', { class: 'k', text: 'TP1 (RR ' + fmt(Math.abs(t1 - e) / dist) + ')' }), h('div', { class: 'v pos', text: fmt(t1) })),
+          isFinite(t2) ? h('div', {}, h('div', { class: 'k', text: 'TP2 (RR ' + fmt(Math.abs(t2 - e) / dist) + ')' }), h('div', { class: 'v pos', text: fmt(t2) })) : null));
+      if (p.invalidation) card.append(h('div', { class: 'foot', style: 'margin-top:8px' }, h('b', { text: 'បោះបង់ពេល: ' }), p.invalidation));
+      card.append(h('div', { style: 'margin-top:12px' }, h('button', { class: 'btn ghost', text: 'ផ្ទេរទៅ "ពិនិត្យមុនចូល"', onclick: function () {
+        $('dir').value = dir; $('entry').value = e; $('sl').value = s; $('tp1').value = t1; $('tp2').value = isFinite(t2) ? t2 : '';
+        ['dir', 'entry', 'sl', 'tp1', 'tp2'].forEach(function (id) { $(id).dispatchEvent(new Event('input')); });
+        showTab('A');
+      } })));
+      card.append(h('div', { class: 'foot', style: 'margin-top:8px', text: 'ការផ្ទេរមិនធីកជំហាន ICT ឲ្យទេ។ បងត្រូវពិនិត្យលើ Chart ដោយខ្លួនឯង។' }));
+      out.append(card);
+    }
+
+    if (Array.isArray(d.steps) && d.steps.length) {
+      var ul = h('ul', { class: 'clean' });
+      d.steps.slice(0, 5).forEach(function (st) {
+        var status = ['ok', 'partial', 'no', 'unknown'].indexOf(st.status) >= 0 ? st.status : 'unknown';
+        ul.append(h('li', { class: 'step' }, h('div', { class: 'mark ' + (status === 'ok' ? 'ok' : status === 'no' ? 'no' : status === 'partial' ? 'opt' : ''), text: status === 'ok' ? '✓' : status === 'partial' ? '◐' : status === 'no' ? '✕' : '?' }),
+          h('div', {}, h('div', { class: 'name', text: (st.n || '') + '. ' + (st.name || '') }), h('div', { class: 'note', text: st.note || '' }))));
+      });
+      out.append(h('div', { class: 'card' }, h('h2', { text: 'ICT 5 ជំហាន' }), ul, h('div', { class: 'foot', style: 'margin-top:10px', text: '✓ ត្រូវ  ◐ ខ្លះ  ✕ មិនត្រូវ  ? មិនអាចឃើញក្នុងរូប' })));
+    }
+    if (Array.isArray(d.zones) && d.zones.length) {
+      var zl = h('div', { style: 'display:grid;gap:8px' });
+      d.zones.slice(0, 8).forEach(function (z) {
+        var lo = num(z.low), hi = num(z.high);
+        zl.append(h('div', { class: 'zone ' + (z.side === 'sell' ? 'sell' : 'buy') },
+          h('div', { class: 'row' }, h('span', { class: 'zt', text: (z.type || '') + (z.side === 'sell' ? ' លក់' : z.side === 'buy' ? ' ទិញ' : '') }),
+            h('span', { class: 'zr', text: (isFinite(lo) && isFinite(hi)) ? fmt(Math.min(lo, hi)) + ' – ' + fmt(Math.max(lo, hi)) : 'មិនបានអានតម្លៃ' })),
+          h('div', { class: 'foot', text: z.note || '' })));
+      });
+      out.append(h('div', { class: 'card' }, h('h2', { text: 'តំបន់សំខាន់ៗ' }), zl));
+    }
+    if (d.nextStep) out.append(h('div', { class: 'card' }, h('h2', { text: 'ជំហានបន្ទាប់' }), h('div', { text: d.nextStep })));
+    if (warns.length) out.append(h('div', { class: 'notice' }, h('b', { text: 'ចំណាំ' }), h('ul', { style: 'margin:6px 0 0;padding-left:18px' }, warns.map(function (w) { return h('li', { text: String(w) }); }))));
+    if (usage) out.append(h('div', { class: 'foot', text: 'ចំនួន Token ដែលបានប្រើ: បញ្ចូល ' + (usage.input_tokens || 0) + ' · ចេញ ' + (usage.output_tokens || 0) + ' (ប្រើគណនាថ្លៃ)។' }));
+  }
+  aiReady();
+
+  /* ---------- ចាប់ផ្តើម ---------- */
+  load();
+  bindPrefs();
+  renderSteps();
+  renderAll();
+  updateClock();
+  setInterval(function () { updateClock(); renderVerdict(); }, 60000);
+  if (!storageOk) jmsg('Browser នេះមិនអនុញ្ញាតឲ្យរក្សាទុកទិន្នន័យទេ។ ទិន្នន័យនឹងបាត់ពេលបិទទំព័រ។', true);
+})();
+</script>
+</body>
+</html>
