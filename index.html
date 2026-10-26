@@ -357,10 +357,10 @@ table.t th, table.t td { text-align: left; padding: 6px 8px; border-bottom: 1px 
   function updateClock() {
     var m = marketState();
     var box = $('clock'); box.replaceChildren();
-    box.append(
+    box.append.apply(box, [
       h('span', { class: 'chip', text: 'ម៉ោង New York ' + m.hr + ':00' }),
       h('span', { class: 'chip ' + (m.kz ? 'buy' : 'wait'), text: m.kz ? 'ក្នុង Killzone ' + m.kz : 'ក្រៅ Killzone (' + m.label + ')' }),
-      m.closed ? h('span', { class: 'chip sell', text: 'ទីផ្សារមាសបិទ' }) : m.opening ? h('span', { class: 'chip wait', text: 'ទើបបើកទីផ្សារ' }) : null);
+      m.closed ? h('span', { class: 'chip sell', text: 'ទីផ្សារមាសបិទ' }) : m.opening ? h('span', { class: 'chip wait', text: 'ទើបបើកទីផ្សារ' }) : null].filter(Boolean));
   }
 
   /* ---------- ការគណនា ---------- */
