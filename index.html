@@ -776,7 +776,11 @@ table.t th, table.t td { text-align: left; padding: 6px 8px; border-bottom: 1px 
             { type: 'text', text: aiPrompt() }] }]
         })
       });
-      if (!res.ok) { var er = new Error('http'); er.status = res.status; throw er; }
+      if (!res.ok) {
+        var er = new Error('http'); er.status = res.status;
+        try { var eb = await res.json(); er.detail = (eb && eb.error && eb.error.message) || ''; } catch (x) { er.detail = ''; }
+        throw er;
+      }
       var body = await res.json();
       var text = (body.content || []).map(function (c) { return c.text || ''; }).join('');
       var d = parseJson(text);
@@ -785,7 +789,9 @@ table.t th, table.t td { text-align: left; padding: 6px 8px; border-bottom: 1px 
     } catch (e) {
       var msg;
       if (e && e.name === 'AbortError') msg = null;
-      else if (e && e.status) msg = AIERR[e.status] || ('មានបញ្ហា (កូដ ' + e.status + ')។ សូមព្យាយាមម្តងទៀត។');
+      else if (e && e.status && /credit balance|billing/i.test(e.detail || '')) msg = 'គណនី Console គ្មានឥណទាន ($0.00)។ សូមចូល Console → Billing → Add funds ដាក់លុយយ៉ាងតិច $5 ហើយសាកម្តងទៀត។';
+      else if (e && e.status) msg = (AIERR[e.status] || ('មានបញ្ហា (កូដ ' + e.status + ')។ សូមព្យាយាមម្តងទៀត។')) + (e.detail ? ' [' + e.detail.slice(0, 160) + ']' : '');
+      else if (false) msg = AIERR[e.status] || ('មានបញ្ហា (កូដ ' + e.status + ')។ សូមព្យាយាមម្តងទៀត។');
       else if (e && e.message === 'nojson') msg = 'ចម្លើយមិនមានទម្រង់ត្រឹមត្រូវ។ សូមចុចវិភាគម្តងទៀត។';
       else if (e && e.message === 'image') msg = 'អានរូបមិនបាន។ សូមជ្រើសរូបផ្សេង។';
       else msg = 'ភ្ជាប់ទៅ AI មិនបាន។ សូមពិនិត្យអ៊ីនធឺណិត ហើយព្យាយាមម្តងទៀត។';
