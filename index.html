@@ -753,6 +753,11 @@ table.t th, table.t td { text-align: left; padding: 6px 8px; border-bottom: 1px 
     if (ai.ctl) return;
     var key = $('aiKey').value.trim();
     if (!key || !ai.htf || !ai.ltf) return;
+    if (key.indexOf('sk-ant-') !== 0 || key.length < 80) {
+      aiStatus('កូនសោមិនត្រឹមត្រូវ');
+      $('aiOut').replaceChildren(h('div', { class: 'notice danger', text: 'កូនសោដែលបានបញ្ចូលមានប្រវែង ' + key.length + ' តួអក្សរ ហើយមិនមែនជាទម្រង់កូនសោ API ទេ។ កូនសោពិតចាប់ផ្តើមដោយ sk-ant- និងវែងជាង ១០០ តួអក្សរ។ សូមបង្កើតកូនសោថ្មីក្នុង console.anthropic.com ហើយចម្លងឲ្យពេញ។' }));
+      return;
+    }
     ai.ctl = new AbortController();
     $('aiGo').disabled = true; $('aiStop').hidden = false; $('aiOut').replaceChildren();
     var t0 = Date.now();
